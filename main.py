@@ -2,6 +2,7 @@ import os
 import yaml
 import json
 import requests
+import base64
 from mirai import *
 
 from pkg.plugin.context import register, handler, BasePlugin, APIHost, EventContext
@@ -10,7 +11,7 @@ from pkg.command import entities
 from pkg.command.operator import CommandOperator, operator_class
 import typing
 
-from plugins.NewChatVoice.pkg.generate_voice import generate_audio,get_character_list
+from plugins.NewChatVoice.pkg.generate_voice import generate_audio, get_character_list
 from plugins.NewChatVoice.pkg.user_prefer import get_preference, change_preference
 from plugins.NewChatVoice.pkg.check_token import check_token
 
@@ -136,7 +137,13 @@ class SwitchVoicePlugin(CommandOperator):
         yield entities.CommandReturn(text=result)
 
 
-@register(name="NewChatVoice", description="一个可以生成多种音色的语音对话插件", version="1.0", author="the-lazy-me")
+class VoiceSynthesisError(Exception):
+
+    def __init__(self, message: str = None):
+        super().__init__("语音合成错误: " + (message if message else "未知错误"))
+
+
+@register(name="NewChatVoice", description="一个可以生成多种音色的语音对话插件", version="1.1", author="the-lazy-me")
 class VoicePlugin(BasePlugin):
     def __init__(self, host: APIHost):
         super().__init__(host)
@@ -181,5 +188,38 @@ class VoicePlugin(BasePlugin):
         user_preference = load_user_preference(user)
         if user_preference['switch']:
             voice_path = generate_audio(res_text, user_preference['detail']['voice_id'], self.session)
-            if voice_path:
-                ctx.add_return("reply", [Voice(path=str(voice_path))])
+            if os.path.exists(voice_path):
+                with open(voice_path, "rb") as audio_file:
+                    audio_data = audio_file.read()
+                    base64_silk = base64.b64encode(audio_data).decode("utf-8")
+                    ctx.add_return("reply", [Voice(base64=base64_silk)])
+
+    async def ncv_tts(self, user_id: str, text: str) -> Voice:
+        """
+        将文本转换为语音
+
+        Args:
+            user_id (str): 用户ID
+            text (str): 要转换的文本
+
+        Returns:
+            Voice: 包含生成语音路径的对象
+
+        Raises:
+            VoiceSynthesisError: 如果语音生成失败或者API调用失败
+        """
+        try:
+            user_preference = load_user_preference(user_id)
+            if user_preference["switch"]:
+                voice_path = generate_audio(text, user_preference["detail"]["voice_id"], self.session)
+                if os.path.exists(voice_path):
+                    with open(voice_path, "rb") as audio_file:
+                        audio_data = audio_file.read()
+                        base64_silk = base64.b64encode(audio_data).decode("utf-8")
+                        return Voice(base64=base64_silk)
+                else:
+                    raise VoiceSynthesisError("语音生成失败")
+            else:
+                raise VoiceSynthesisError("语音合成未开启")
+        except Exception as e:
+            raise VoiceSynthesisError(f"API调用失败: {e}")

@@ -16,11 +16,11 @@ def load_config():
 
 config, base_path = load_config()
 
-url = config['token']
+token = config["token"]
 
 # 截取token，是url中的token参数，如果不是url，则直接视作token
-if 'http' in url:
-    token = url.split('=')[1]
+if "http" in token:
+    token = token.split("=")[1]
 
 
 def remove_emojis(text):
@@ -100,7 +100,7 @@ def get_audio_url(text, voice_id, session=None):
     response = session.post(url, headers=headers, data=payload)
     if response.status_code == 200:
         json_response = response.json()
-        return f"{json_response['url']}:{json_response['port']}/flashsummary/retrieveFileData?stream=True&token={config['token']}&voice_audio_path={json_response['voice_path']}"
+        return f"{json_response['url']}:{json_response['port']}/flashsummary/retrieveFileData?stream=True&token={token}&voice_audio_path={json_response['voice_path']}"
     else:
         print(response.text)
         return None
