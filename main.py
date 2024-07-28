@@ -1,71 +1,18 @@
 import os
-import yaml
-import json
-import requests
+import shutil
+import typing
+import base64
 from mirai import *
 
 from pkg.plugin.context import register, handler, BasePlugin, APIHost, EventContext
 from pkg.plugin.events import *
 from pkg.command import entities
 from pkg.command.operator import CommandOperator, operator_class
-import typing
-
-from plugins.NewChatVoice.pkg.generate_voice import generate_audio,get_character_list
-from plugins.NewChatVoice.pkg.user_prefer import get_preference, change_preference
-from plugins.NewChatVoice.pkg.check_token import check_token
+from plugins.NewChatVoice.pkg.voice import VoiceBase
+from plugins.NewChatVoice.pkg.user_prefer import UserPreference
 
 
-def load_config():
-    config_path = os.path.join(os.path.dirname(__file__), 'config/config.yml')
-    try:
-        with open(config_path, 'r', encoding='utf-8') as f:
-            return yaml.safe_load(f)
-    except Exception as e:
-        print(f"Error loading configuration: {e}")
-        return {}
-
-
-def load_character_dict():
-    character_path = os.path.join(os.path.dirname(__file__), 'data/character.json')
-    # 如果没有character.json文件或者内容为空，则获取角色数据
-    if not os.path.exists(character_path) or os.path.getsize(character_path) == 0:
-        get_character_list()
-    try:
-        with open(character_path, 'r', encoding='UTF-8') as file:
-            character_list = json.load(file)
-            return {str(ch['id']): ch for ch in character_list}
-    except Exception as e:
-        print(f"Error loading characters: {e}")
-        return {}
-
-
-def load_user_preference(user_id):
-    user_preference = get_preference(str(user_id))
-    if not user_preference:
-        default_preference = {
-            "switch": config['voice_switch'],
-            "provider": "haitunAI",
-            "detail": {
-                "voice_id": int(default_character_id),
-                "voice_name": config['character']
-            }
-        }
-        change_preference(user_id, default_preference)
-        return default_preference
-    return user_preference
-
-
-config = load_config()
-character_dict = load_character_dict()
-if character_dict=={}:
-    get_character_list()
-default_voice_switch = config.get('voice_switch', True)
-default_character = config.get('character', 'default_character')
-default_character_id = None
-for char_id, char_info in character_dict.items():
-    if char_info['voice_name'] == default_character:
-        default_character_id = char_id
-        break
+user_prefer: typing.Dict[str, UserPreference] = {}
 
 
 @operator_class(name="ncv", help="获取帮助请输入：！ncv 帮助", privilege=1)
@@ -73,41 +20,43 @@ class SwitchVoicePlugin(CommandOperator):
 
     def __init__(self, host: APIHost):
         super().__init__(host)
-        self.voice_enabled = config.get('voice_switch', True)
-        self.character = config.get('character', 'default_character')
-        self.session = requests.Session()
+        global user_prefer
 
     async def enable_voice(self, user_id):
-        change_preference(str(user_id), {"switch": True})
+        await user_prefer[user_id].change_preference({"voice_switch": True})
         return f"为用户{user_id}开启语音合成"
 
     async def disable_voice(self, user_id):
-        change_preference(str(user_id), {"switch": False})
+        await user_prefer[user_id].change_preference({"voice_switch": False})
         return f"为用户{user_id}关闭语音合成"
 
     async def check_status(self, user_id):
-        user_preference = load_user_preference(user_id)
-        return f"用户{user_id}的当前语音合成状态为：{user_preference['switch']}，使用角色为：{user_preference['detail']['voice_name']}"
+        return f"用户{user_id}的当前语音合成状态为：{user_prefer[user_id].voice_switch}，使用角色为：{user_prefer[user_id].get_character_by_id()}"
 
     async def list_characters(self):
-        return_text = "当前角色较多，请查看云文档：\n" \
-                      "飞书云文档：https://s1c65jp249c.feishu.cn/sheets/WoiOsshwfhtUXRt2ZS0cVMCFnLc?from=from_copylink  \n" \
-                      "腾讯文档：https://docs.qq.com/sheet/DSFhQT3dUZkpabHVu?tab=BB08J2  \n" \
-                      "切换角色请使用id,例如切换角色为流萤(id为2075): !ncv 切换 2075"
+        return_text = (
+            "当前角色较多，请查看云文档：\n"
+            "飞书云文档：https://s1c65jp249c.feishu.cn/sheets/WoiOsshwfhtUXRt2ZS0cVMCFnLc?from=from_copylink  \n"
+            "腾讯文档：https://docs.qq.com/sheet/DSFhQT3dUZkpabHVu?tab=BB08J2  \n"
+            "切换角色可使用名称或id,例如切换角色为流萤(id为2075): !ncv 切换 2075"
+        )
         return return_text
 
-    async def switch_character(self, user_id, character_id):
-        character_info = character_dict.get(str(character_id))
-        if character_info:
-            change_preference(str(user_id),
-                              {"detail": {"voice_id": int(character_id), "voice_name": character_info['voice_name']}})
-            return f"为用户{user_id}切换语音合成角色为：{character_info['voice_name']}"
+    async def switch_character(self, user_id, character_id: str):
+        info = await user_prefer[user_id].get_character_info(character_id)
+        if info:
+            await user_prefer[user_id].change_preference({"character_id": info["id"]})
+            return f"为用户{user_id}切换语音合成角色为：{info['voice_name']}"
         else:
             return "未找到指定的角色"
 
     async def execute(self, context: entities.ExecuteContext) -> typing.AsyncGenerator[entities.CommandReturn, None]:
-        user_id = context.query.sender_id
+        user_id = context.query.launcher_id
         command = context.crt_params[0]
+        if user_id not in user_prefer:
+            user_prefer[user_id] = UserPreference(user_id)
+            await user_prefer[user_id].load_config()
+
         if command == "开启":
             result = await self.enable_voice(user_id)
         elif command == "关闭":
@@ -122,80 +71,122 @@ class SwitchVoicePlugin(CommandOperator):
             else:
                 result = await self.switch_character(user_id, context.crt_params[1])
         elif command == "帮助":
-            result = "NewChatVoice语音合成插件,一个可以生成多种音色的语音对话插件 \n" \
-                     "支持的指令有：\n" \
-                     "!ncv 开启\n" \
-                     "!ncv 关闭\n" \
-                     "!ncv 状态\n" \
-                     "!ncv 角色列表\n" \
-                     "!ncv 切换 <角色id>\n" \
-                     "!ncv 帮助"
+            result = "NewChatVoice语音合成插件,一个可以生成多种音色的语音对话插件 \n" "支持的指令有：\n" "!ncv 开启\n" "!ncv 关闭\n" "!ncv 状态\n" "!ncv 角色列表\n" "!ncv 切换 <角色id>\n" "!ncv 帮助"
 
         else:
-            result = "无效指令，请输入\"!ncv 帮助\"查看帮助"
+            result = '无效指令，请输入"!ncv 帮助"查看帮助'
         yield entities.CommandReturn(text=result)
 
 
-@register(name="NewChatVoice", description="一个可以生成多种音色的语音对话插件", version="1.0", author="the-lazy-me")
+class VoiceSynthesisError(Exception):
+
+    def __init__(self, message: str = None):
+        super().__init__("语音合成错误: " + (message if message else "未知错误"))
+
+
+@register(name="NewChatVoice", description="一个可以生成多种音色的语音对话插件", version="1.1", author="the-lazy-me")
 class VoicePlugin(BasePlugin):
     def __init__(self, host: APIHost):
         super().__init__(host)
-        self.session = requests.Session()
-        os.makedirs(os.path.join(os.path.dirname(__file__), "audio_temp"), exist_ok=True)
-        audio_temp_path = os.path.join(os.path.dirname(__file__), "audio_temp")
-        for file in os.listdir(audio_temp_path):
-            os.remove(os.path.join(audio_temp_path, file))
-
-        # 检查data下是否有preference.json文件，没有则创建，并写入{}
-        current_dir = os.path.dirname(os.path.abspath(__file__))
-        preference_path = os.path.join(current_dir, 'data', 'preference.json')
-        if not os.path.exists(preference_path):
-            with open(preference_path, 'w', encoding='utf-8') as file:
-                file.write('{}')
-
+        global user_prefer
+        self.ap = host.ap
+        self.voice = None
+        self._ensure_required_files_exist()
 
     async def initialize(self):
-        result = check_token()
+        user_prefer["default"] = UserPreference()
+        self.voice = VoiceBase(user_prefer["default"].temp_dir_path)
+
+        # 如果没有character.json文件或者内容为空，则获取角色数据
+        character_path = user_prefer["default"].character_path
+        if not os.path.exists(character_path) or os.path.getsize(character_path) == 0:
+            await self.voice.get_character_list(character_path)
+
+        # 需要character_list已经下载完成
+        await user_prefer["default"].load_config()
+
+        self.voice.set_token(user_prefer["default"].token)
+        result = await self.voice.check_token()
         self.ap.logger.info("NewChatVoice插件提示：" + result)
 
-    @handler(PersonMessageReceived)
-    async def check_user(self, ctx: EventContext):
-        user = ctx.event.sender_id
-        user_preference = load_user_preference(user)
-        # 如果用户没有设置偏好，则设置默认偏好
-        if not user_preference:
-            default_preference = {
-                "switch": default_voice_switch,
-                "provider": "haitunAI",
-                "detail": {
-                    "voice_id": int(default_character_id),
-                    "voice_name": default_character
-                }
-            }
-            change_preference(user, default_preference)
+        # 删除缓存目录并重新创建
+        temp_dir_path = user_prefer["default"].temp_dir_path
+        if os.path.exists(temp_dir_path):
+            shutil.rmtree(temp_dir_path)
+        os.makedirs(temp_dir_path)
 
-    @handler(GroupMessageReceived)
-    async def check_user(self, ctx: EventContext):
-        user = ctx.event.sender_id
-        user_preference = load_user_preference(user)
-        # 如果用户没有设置偏好，则设置默认偏好
-        if not user_preference:
-            default_preference = {
-                "switch": default_voice_switch,
-                "provider": "haitunAI",
-                "detail": {
-                    "voice_id": int(default_character_id),
-                    "voice_name": default_character
-                }
-            }
-            change_preference(user, default_preference)
+    def _ensure_required_files_exist(self):
+        directories = ["plugins/NewChatVoice/data/", "plugins/NewChatVoice/config"]
+
+        for directory in directories:
+            if not os.path.exists(directory):
+                os.makedirs(directory)
+                self.ap.logger.info(f"Directory created: {directory}")
+            self._set_permissions_recursively(directory)
+
+    def _set_permissions_recursively(self, path, mode=0o777):
+        for root, dirs, files in os.walk(path):
+            for dirname in dirs:
+                os.chmod(os.path.join(root, dirname), mode)
+            for filename in files:
+                os.chmod(os.path.join(root, filename), mode)
 
     @handler(NormalMessageResponded)
     async def text_to_voice(self, ctx: EventContext):
-        user = ctx.event.sender_id
-        res_text = ctx.event.response_text
-        user_preference = load_user_preference(user)
-        if user_preference['switch']:
-            voice_path = generate_audio(res_text, user_preference['detail']['voice_id'], self.session)
-            if voice_path:
-                ctx.add_return("reply", [Voice(path=str(voice_path))])
+        user_id = ctx.event.launcher_id
+        if user_id not in user_prefer:
+            user_prefer[user_id] = UserPreference(user_id)
+            await user_prefer[user_id].load_config()
+        if user_prefer[user_id].voice_switch:
+            voice = await self._get_voice(user_id, ctx.event.response_text)
+            ctx.add_return("reply", [voice])
+
+    async def ncv_tts(self, user_id: str, text: str) -> Voice:
+        """
+        供外部调用的文字转Voice的接口
+
+        Args:
+            user_id (str): 会话ID
+            text (str): 要转换的文本
+
+        Returns:
+            Voice: 生成的语音对象
+        """
+        return await self._get_voice(user_id, text, True)
+
+    async def _get_voice(self, user_id: str, text: str, is_api: bool = False) -> Voice:
+        """
+        将文本转换为语音
+
+        Args:
+            user_id (str): 会话ID
+            text (str): 要转换的文本
+
+        Returns:
+            Voice: 生成的语音对象
+
+        Raises:
+            VoiceSynthesisError: 如果语音生成失败或者API调用失败
+        """
+        try:
+            if not self.voice:
+                await self.initialize()
+            if user_id not in user_prefer:
+                user_prefer[user_id] = UserPreference(user_id)
+                await user_prefer[user_id].load_config()
+            if is_api or user_prefer[user_id].voice_switch:
+                voice_path = await self.voice.generate_audio(text, user_prefer[user_id].character_id)
+                if os.path.exists(voice_path):
+                    if user_prefer[user_id].voice_type == "base64":
+                        with open(voice_path, "rb") as audio_file:
+                            audio_data = audio_file.read()
+                            base64_silk = base64.b64encode(audio_data).decode("utf-8")
+                            return Voice(base64=base64_silk)
+                    else:
+                        return Voice(path=str(voice_path))
+                else:
+                    raise VoiceSynthesisError("语音生成失败")
+            else:
+                raise VoiceSynthesisError("语音合成未开启")
+        except Exception as e:
+            raise VoiceSynthesisError(f"API调用失败: {e}")
