@@ -15,7 +15,7 @@ TODO：
 - [ ] 支持更多TTS平台，包括在线和本地的，如[GPT-SoVITS](https://github.com/RVC-Boss/GPT-SoVITS)
 - [ ] 支持用户单独配置token等鉴权密钥
 - [ ] 支持返回更长语音
-- [ ] 联动其他插件，如**[Waifu](https://github.com/ElvisChenML/Waifu)**
+- [ ] 联动其他插件，如[Waifu](https://github.com/ElvisChenML/Waifu)
 - [ ] 可能的WebUI配置页面，实现支持在线页面切换
 
 ## NewChatVoice插件使用（重要）
