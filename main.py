@@ -174,6 +174,22 @@ class VoicePlugin(BasePlugin):
             }
             change_preference(user, default_preference)
 
+    @handler(GroupMessageReceived)
+    async def check_user(self, ctx: EventContext):
+        user = ctx.event.sender_id
+        user_preference = load_user_preference(user)
+        # 如果用户没有设置偏好，则设置默认偏好
+        if not user_preference:
+            default_preference = {
+                "switch": default_voice_switch,
+                "provider": "haitunAI",
+                "detail": {
+                    "voice_id": int(default_character_id),
+                    "voice_name": default_character
+                }
+            }
+            change_preference(user, default_preference)
+
     @handler(NormalMessageResponded)
     async def text_to_voice(self, ctx: EventContext):
         user = ctx.event.sender_id
