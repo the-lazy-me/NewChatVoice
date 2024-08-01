@@ -84,7 +84,7 @@ class VoiceSynthesisError(Exception):
         super().__init__("语音合成错误: " + (message if message else "未知错误"))
 
 
-@register(name="NewChatVoice", description="一个可以生成多种音色的语音对话插件", version="1.1", author="the-lazy-me")
+@register(name="NewChatVoice", description="一个可以生成多种音色的语音对话插件", version="1.2", author="the-lazy-me")
 class VoicePlugin(BasePlugin):
     def __init__(self, host: APIHost):
         super().__init__(host)
@@ -115,14 +115,17 @@ class VoicePlugin(BasePlugin):
             shutil.rmtree(temp_dir_path)
         os.makedirs(temp_dir_path)
 
+        self._set_permissions_recursively("data/plugins/NewChatVoice", 0o777)
+
     def _ensure_required_files_exist(self):
-        directories = ["plugins/NewChatVoice/data/", "plugins/NewChatVoice/config"]
+        directories = ["data/plugins/NewChatVoice/data/", "data/plugins/NewChatVoice/config"]
 
         for directory in directories:
             if not os.path.exists(directory):
                 os.makedirs(directory)
                 self.ap.logger.info(f"Directory created: {directory}")
-            self._set_permissions_recursively(directory)
+                
+        self._set_permissions_recursively("data/plugins/NewChatVoice", 0o777)
 
     def _set_permissions_recursively(self, path, mode=0o777):
         for root, dirs, files in os.walk(path):

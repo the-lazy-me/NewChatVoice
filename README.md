@@ -16,6 +16,10 @@ TODO：
 
 ## 版本记录
 
+### NewChatVoice 1.2
+
+* 修改 配置文件位置，为了避免升级时被删除，过程文件及配置文件目录移至插件目录外：“QChatGPT\data\plugins\NewChatVoice\”。
+
 ### NewChatVoice 1.1
 
 * 新增 外部调用接口。
@@ -94,7 +98,7 @@ voice_switch: False
 # 语音传输方式：path/base64，如果遇到消息平台访问权限问题，可尝试切换
 voice_type: path
 # 语音缓存路径，如果遇到消息平台访问权限问题，可以尝试修改至消息平台有权限访问的目录
-temp_dir_path: plugins/NewChatVoice/audio_temp
+temp_dir_path: data/plugins/NewChatVoice/audio_temp
 # token，这个是必须的，不然无法使用，获取方式请看文档
 token: 填入购买后显示的网站
 ```
