@@ -194,25 +194,35 @@ class NCV:
         global_config = self._load_global_config()
         max_length = global_config["max_characters"]
 
-        # 如果文本长度未超过 max_length，直接返回文本
-        if len(text) <= max_length:
-            return [text]
+        # 移除多余的空行
+        text = re.sub(r'\n+', '\n', text).strip()
 
-        # 否则，使用正则表达式匹配中文和英文的句子结束符进行切分
-        sentences = re.split(r"(?<=[。！？；：.!?;:])", text)  # 使用正则表达式在标点符号后切分
-
+        # 根据换行符切分段落
+        paragraphs = text.split('\n')
         short_sentences = []
-        for sentence in sentences:
-            if len(sentence) > max_length:
-                # 如果句子长度仍然超过 max_length，再进一步切分
-                short_sentences.extend([sentence[i:i + max_length] for i in range(0, len(sentence), max_length)])
+
+        # 处理每个段落
+        for paragraph in paragraphs:
+            if len(paragraph) <= max_length:
+                short_sentences.append(paragraph)
             else:
-                short_sentences.append(sentence)
+                # 使用正则表达式在标点符号后切分
+                sentences = re.split(r"(?<=[。！？；：.!?;:])", paragraph)
+                current_sentence = ""
+                for sentence in sentences:
+                    if len(current_sentence) + len(sentence) > max_length:
+                        if current_sentence:
+                            short_sentences.append(current_sentence)
+                        current_sentence = sentence
+                    else:
+                        current_sentence += sentence
+                if current_sentence:
+                    short_sentences.append(current_sentence)
 
         return short_sentences
 
-    # 生成音频
-    async def generate_audio(self, user_id, text):
+    # 自动切分长句并生成音频
+    async def auto_split_generate_audio(self, user_id, text):
         try:
             user_id = int(user_id)
         except ValueError:
@@ -255,6 +265,35 @@ class NCV:
 
         return voice_paths
 
-    # 异步生成音频
-    async def generate_audio_async(self, user_id, text):
-        return await self.generate_audio(user_id, text)
+    # 不切分长句生成音频
+    async def no_split_generate_audio(self, user_id, text):
+        try:
+            user_id = int(user_id)
+        except ValueError:
+            raise ValueError("Invalid user_id: must be an integer")
+
+        global_config = self._load_global_config()
+        temp_dir_path = self.temp_dir_path
+
+        user_preference = self.load_user_preference(user_id)
+
+        if not user_preference:
+            user_preference = self._create_user_preference(user_id)
+
+        provider_name = user_preference.get("provider", global_config["provider"])
+        provider_config = global_config[provider_name]
+
+        provider = ProviderFactory.get_provider(provider_name, provider_config, temp_dir_path)
+
+        if provider_name == "acgn_ttson":
+            character_id = user_preference.get("acgn_ttson", {}).get("character_id", provider_config["character_id"])
+            audio_path = await provider.generate_audio(text, character_id=character_id)
+        elif provider_name == "gpt_sovits":
+            character_name = user_preference.get("gpt_sovits", {}).get("character_name",
+                                                                       provider_config["character_name"])
+            emotion = user_preference.get("gpt_sovits", {}).get("emotion", provider_config["emotion"])
+            audio_path = await provider.generate_audio(text, character_name=character_name, emotion=emotion)
+        else:
+            raise ValueError(f"未知的TTS平台: {provider_name}")
+
+        return audio_path

@@ -135,7 +135,7 @@ class SwitchVoicePlugin(CommandOperator):
         yield entities.CommandReturn(text=result)
 
 
-@register(name="NewChatVoice", description="一个可以生成多种音色的语音对话插件", version="2.0", author="the-lazy-me")
+@register(name="NewChatVoice", description="一个可以生成多种音色的语音对话插件", version="2.1", author="the-lazy-me")
 class VoicePlugin(BasePlugin):
     def __init__(self, host: APIHost):
         super().__init__(host)
@@ -148,50 +148,73 @@ class VoicePlugin(BasePlugin):
         temp_dir_path = global_config['temp_dir_path']
         _clear_temp_dir(temp_dir_path)
 
-    async def ncv_outside_interface(self, sender_id: str, text: str) -> Voice:
+    async def ncv_outside_interface(self, sender_id: str, text: str, split: bool) -> Voice:
         """
         供外部调用的文字转Voice的接口
 
         Args:
             sender_id (str): 会话ID
             text (str): 要转换的文本
+            split (bool): 是否分割文本
 
         Returns:
             Voice: 生成的语音silk文件列表
         """
-        audio_paths = await self.ncv.generate_audio(sender_id, text)
-        if audio_paths:
-            return audio_paths
+        if split:
+            audio_paths = await self.ncv.auto_split_generate_audio(sender_id, text)
+            if audio_paths:
+                return audio_paths
+        else:
+            audio_path = await self.ncv.no_split_generate_audio(sender_id, text)
+            return audio_path
         return None
 
     @handler(NormalMessageResponded)
     async def text_to_voice(self, ctx: EventContext):
-        # 禁止默认回复行为
         ctx.prevent_default()
-
         launcher_type = str(ctx.event.query.launcher_type)
-        target_type = (launcher_type).split('.')[-1].lower()
+        target_type = launcher_type.split('.')[-1].lower()
         sender_id = ctx.event.sender_id
         group_id = ctx.event.launcher_id
         text = ctx.event.response_text
-        audio_paths = await self.ncv.generate_audio(sender_id, text)
-        if audio_paths:
-            # print(audio_paths)
-            # 遍历生成的音频文件路径
-            for audio_path in audio_paths:
-                if target_type == "group":
-                    # 发送语音消息
-                    await ctx.send_message(target_type, group_id, [Voice(path=str(audio_path))])
-                    if self.voiceWithText:
-                        print("发送文本消息")
-                        # 发送文本消息
-                        await ctx.send_message(target_type, group_id, [Plain(text=text)])
-                elif target_type == "person":
-                    # 发送语音消息
-                    await ctx.send_message(target_type, sender_id, [Voice(path=str(audio_path))])
-                    if self.voiceWithText:
-                        # 发送文本消息
-                        await ctx.send_message(target_type, sender_id, [Plain(text=text)])
+        # audio_paths = await self.ncv.auto_split_generate_audio(sender_id, text)
+        # if audio_paths:
+        #     # 打印音频路径数量
+        #     # print(f"Number of audio paths: {len(audio_paths)}")
+        #     # 根据目标类型决定接收者
+        #     if target_type == "group":
+        #         receiver_id = group_id
+        #     elif target_type == "person":
+        #         receiver_id = sender_id
+        #     else:
+        #         # print(f"Unsupported target type: {target_type}")
+        #         return
+        #
+        #     # 遍历生成的音频文件路径
+        #     for audio_path in audio_paths:
+        #         # print(f"audio_path: {audio_path}")
+        #         # 发送语音消息
+        #         await ctx.send_message(target_type, receiver_id, [Voice(path=str(audio_path))])
+        #         # print(f"Send voice message to {receiver_id}")
+        #
+        #     if self.voiceWithText:
+        #         # 发送文字消息
+        #         await ctx.send_message(target_type, receiver_id, [Plain(text)])
+
+        # 下面做法的原因是，如果一次性发送多个音频文件，在群聊中是正常的，但是在私聊中会出现问题，唉，真可惜
+
+        if target_type == "person":
+            receiver_id = sender_id
+            single_audio_path = await self.ncv.no_split_generate_audio(sender_id, text)
+            await ctx.send_message(target_type, receiver_id, [Voice(path=str(single_audio_path))])
+        elif target_type == "group":
+            receiver_id = group_id
+            audio_paths = await self.ncv.auto_split_generate_audio(sender_id, text)
+            if audio_paths:
+                for audio_path in audio_paths:
+                    await ctx.send_message(target_type, receiver_id, [Voice(path=str(audio_path))])
+            if self.voiceWithText:
+                await ctx.send_message(target_type, receiver_id, [Plain(text)])
 
     # 插件卸载时触发
     def __del__(self):

@@ -16,6 +16,40 @@ TODO：
 
 ## 版本记录
 
+### NewChatVoice 2.1
+
+<details>
+  <summary>更新摘要：</summary>
+   2.1版本为新发，诸多项未经测试，代码未经优化，可能有诸多问题
+
+
+  - 群聊中自动切割长文本，以多个音频分别返回，私聊中单个音频直接返回（不得已而为之）
+
+  - 优化自动切分逻辑
+
+  - 修改外部调用接口
+
+      ```python
+      async def ncv_outside_interface(self, sender_id: str, text: str, split: bool) -> Voice:
+          """
+          供外部调用的文字转Voice的接口
+          Args:
+              sender_id (str): 会话ID
+              text (str): 要转换的文本
+              split (bool): 是否分割文本
+          Returns:
+              Voice: 生成的语音silk文件路径(如果split为True则以列表返回多个路径)
+          """
+          if split:
+              audio_paths = await self.ncv.auto_split_generate_audio(sender_id, text)
+              if audio_paths:
+                  return audio_paths
+          else:
+              audio_path = await self.ncv.no_split_generate_audio(sender_id, text)
+              return audio_path
+      ```
+      </details>
+
 ### NewChatVoice 2.0
 
 <details>
@@ -85,7 +119,7 @@ TODO：
           except ImportError as e:
               self.ap.logger.error(f"Failed to import VoicePlugin: {e}")
               return False
-
+    
           ncv = VoicePlugin(self.host)
           try:
               voice = await ncv.ncv_tts(launcher_id, text)
