@@ -119,7 +119,7 @@ class SwitchVoicePlugin(CommandOperator):
                 "3. 查看当前用户语音合成状态：\n"
                 "!ncv 状态  或  !ncv status\n"
                 "\n"
-                "4. 查看当前TTS平台的角色列表：\n"
+                "4.查看当前TTS平台的角色列表：\n"
                 "!ncv 角色列表  或  !ncv list\n"
                 "\n"
                 "5. 切换TTS平台：\n"
@@ -148,7 +148,7 @@ class VoicePlugin(BasePlugin):
         temp_dir_path = global_config['temp_dir_path']
         _clear_temp_dir(temp_dir_path)
 
-    async def ncv_outsid_interface(self, sender_id: str, text: str) -> Voice:
+    async def ncv_outside_interface(self, sender_id: str, text: str) -> Voice:
         """
         供外部调用的文字转Voice的接口
 
