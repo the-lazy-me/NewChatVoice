@@ -201,7 +201,9 @@ INFO:     Uvicorn running on http://0.0.0.0:5000 (Press CTRL+C to quit)
 >   - 答：这里的`acgn_ttson`是指这个站点[https://acgn.ttson.cn](https://acgn.ttson.cn)，一个在线生成二次元语音的，支持超多角色，生成速度快，生成效果好，使用成本低
 > - gpt_sovits是什么
 >   - 这里的`gpt_sovits`是指GPT-SoVITS，这是[花儿不哭](https://space.bilibili.com/5760446/)大佬研发的低成本AI音色克隆软件。目前只有TTS（文字转语音）功能，将来会更新变声功能。（2024-08-08摘录自[GPT-SoVITS指南](https://www.yuque.com/baicaigongchang1145haoyuangong/ib3g1e)）
->   - 
+>   - 特点：本地部署，自由度高，但是生成速度慢，使用成本高
+> - 我应该选什么
+>   - 为更好的体验，建议使用acgn_ttson，为了更高自由度，选择gpt_sovits
 
 ## 指令（重要）
 
