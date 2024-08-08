@@ -127,7 +127,7 @@ TODO：
 
 如果不使用本地语音则可跳过
 
-整合包来源：B站UP主：**[箱庭XTer](https://space.bilibili.com/66633770)**制作的基于[GPT-SoVITS](https://github.com/RVC-Boss/GPT-SoVITS)开发的 推理特化的 前后端项目[GPT-soVITS-Inference](https://www.yuque.com/xter/zibxlp/kkicvpiogcou5lgp)
+整合包来源：B站UP主：[箱庭XTer](https://space.bilibili.com/66633770)制作的基于[GPT-SoVITS](https://github.com/RVC-Boss/GPT-SoVITS)开发的 推理特化的 前后端项目[GPT-soVITS-Inference](https://www.yuque.com/xter/zibxlp/kkicvpiogcou5lgp)
 
 推理整合包下载路径：[参考原教程的整合包下载部分](https://www.yuque.com/xter/zibxlp/nqi871glgxfy717e#K8NQm)
 
