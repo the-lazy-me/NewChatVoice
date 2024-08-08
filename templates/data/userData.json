@@ -1,0 +1,12 @@
+{
+  "provider": "acgn_ttson",
+  "voice_switch": true,
+  "acgn_ttson": {
+    "character_id": 430,
+    "character_name": "派蒙"
+  },
+  "gpt_sovits": {
+    "character_name": "Hutao",
+    "emotion": "default"
+  }
+}

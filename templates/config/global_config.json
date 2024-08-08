@@ -1,0 +1,19 @@
+{
+  "provider": "acgn_ttson",
+  "max_characters": 300,
+  "voiceWithText": false,
+  "temp_dir_path": "data/plugins/NewChatVoice/temp",
+  "data_dir_path": "data/plugins/NewChatVoice/data",
+  "acgn_ttson": {
+    "character_id": 430,
+    "token": "填入购买后给出的网址"
+  },
+  "gpt_sovits": {
+    "url": "http://127.0.0.1:5000",
+    "character_name": "Hutao",
+    "emotion": "default",
+    "batch_size": 1,
+    "speed": 1.0,
+    "save_temp": true
+  }
+}
