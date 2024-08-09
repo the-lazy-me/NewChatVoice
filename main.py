@@ -32,7 +32,7 @@ class SwitchVoicePlugin(CommandOperator):
         provider = user_prefer["provider"]
         character_name = user_prefer[provider]["character_name"]
         return_text = (f"用户{sender_id}的当前语音合成状态为：\n"
-                       f"语音合成开关：{'开启' if user_prefer['voice_switch'] else '关闭'}\n"
+                       f"语音合成开关状态为：{'开启' if user_prefer['voice_switch'] else '关闭'}\n"
                        f"使用的TTS平台为：{provider}\n"
                        f"使用的角色为：{character_name}")
         if provider == "gpt_sovits":
@@ -149,27 +149,35 @@ class VoicePlugin(BasePlugin):
         temp_dir_path = global_config['temp_dir_path']
         _clear_temp_dir(temp_dir_path)
 
+    async def ncv_outside_interface(self, sender_id: str, text: str, split: bool) -> Voice:
+        """
+        供外部调用的文字转Voice的接口
 
-async def ncv_outside_interface(self, sender_id: str, text: str, split: bool) -> Voice:
-    """
-    供外部调用的文字转Voice的接口
-    Args:
-        sender_id (str): 会话ID
-        text (str): 要转换的文本
-        split (bool): 是否分割文本
-    Returns:
-        Voice: 生成的语音silk文件路径(如果split为True则以列表返回多个路径)
-    """
-    if split:
-        audio_paths = await self.ncv.auto_split_generate_audio(sender_id, text)
-        if audio_paths:
-            return audio_paths
-    else:
-        audio_path = await self.ncv.no_split_generate_audio(sender_id, text)
-        return audio_path
+        Args:
+            sender_id (str): 会话ID
+            text (str): 要转换的文本
+            split (bool): 是否分割文本
+
+        Returns:
+            Voice: 生成的语音silk文件列表
+        """
+        if split:
+            audio_paths = await self.ncv.auto_split_generate_audio(sender_id, text)
+            if audio_paths:
+                return audio_paths
+        else:
+            audio_path = await self.ncv.no_split_generate_audio(sender_id, text)
+            return audio_path
+        return None
 
     @handler(NormalMessageResponded)
     async def text_to_voice(self, ctx: EventContext):
+        user_prefer = self.ncv.load_user_preference(ctx.event.sender_id)
+
+        if not user_prefer["voice_switch"]:
+            return
+
+        ctx.prevent_default()
         launcher_type = str(ctx.event.query.launcher_type)
         target_type = launcher_type.split('.')[-1].lower()
         sender_id = ctx.event.sender_id
@@ -205,17 +213,14 @@ async def ncv_outside_interface(self, sender_id: str, text: str, split: bool) ->
             receiver_id = sender_id
             single_audio_path = await self.ncv.no_split_generate_audio(sender_id, text)
             await ctx.send_message(target_type, receiver_id, [Voice(path=str(single_audio_path))])
-            ctx.prevent_default()
         elif target_type == "group":
             receiver_id = group_id
             audio_paths = await self.ncv.auto_split_generate_audio(sender_id, text)
             if audio_paths:
                 for audio_path in audio_paths:
                     await ctx.send_message(target_type, receiver_id, [Voice(path=str(audio_path))])
-                ctx.prevent_default()
             if self.voiceWithText:
                 await ctx.send_message(target_type, receiver_id, [Plain(text)])
-                ctx.prevent_default()
 
     # 插件卸载时触发
     def __del__(self):
