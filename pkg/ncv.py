@@ -110,7 +110,7 @@ class NCV:
 
         return f"用户 {user_id} 的TTS服务平台更新为 {provider_name}。"
 
-    def updata_voice_switch(self, user_id, voice_switch: bool):
+    async def updata_voice_switch(self, user_id, voice_switch: bool):
         try:
             user_id = int(user_id)
         except ValueError:
