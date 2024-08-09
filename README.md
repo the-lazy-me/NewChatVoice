@@ -10,7 +10,9 @@
 
 TODO：
 
-- [x] 支持更多TTS平台，包括在线和本地的，如[GPT-SoVITS](https://github.com/RVC-Boss/GPT-SoVITS)
+- [x] 支持[GPT-SoVITS](https://github.com/RVC-Boss/GPT-SoVITS)
+- [ ] 支持[fish-speech](https://github.com/fishaudio/fish-speech)
+- [ ] 支持[ChatTTS](https://github.com/2noise/ChatTTS)
 - [x] 支持返回更长语音，长文本自动切分，分开发送
 - [ ] 可能的WebUI配置页面，实现支持在线页面切换
 
