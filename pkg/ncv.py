@@ -49,12 +49,12 @@ class NCV:
     async def get_character_list(self, provider_name):
         global_config = self._load_global_config()
         provider_config = global_config[provider_name]
-        provider = ProviderFactory.get_provider(provider_name, provider_config, self.data_dir_path)
+        provider = ProviderFactory.get_provider(provider_name, provider_config, self.temp_dir_path)
         return await provider.get_character_list()
 
     # 加载角色列表，如果不存在则获取并保存
     async def _load_character_list(self, provider_name):
-        character_list_path = os.path.join(self.data_dir_path, f"character_list_{provider_name}.json")
+        character_list_path = os.path.join(self.temp_dir_path, f"character_list_{provider_name}.json")
 
         if os.path.exists(character_list_path):
             with open(character_list_path, "r", encoding="utf-8") as file:

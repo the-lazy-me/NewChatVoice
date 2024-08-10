@@ -6,7 +6,7 @@
   "data_dir_path": "data/plugins/NewChatVoice/data",
   "acgn_ttson": {
     "character_id": 430,
-    "token": "填入购买后给出的网址"
+    "token": "https://www.ttson.cn/?token=048F398615EB4158C098D11DFA30950D"
   },
   "gpt_sovits": {
     "url": "http://127.0.0.1:5000",

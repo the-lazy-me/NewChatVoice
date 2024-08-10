@@ -51,8 +51,19 @@ class SwitchVoicePlugin(CommandOperator):
                 "切换角色使用对应角色的id，例如切换角色为流萤(id为2075): !ncv 角色 2075"
             )
         elif provider_name == "gpt_sovits":
-            character_list = self.ncv.get_character_list(provider_name)
-            return_text = f"当前提供者为：{provider_name}，角色列表：\n" + "\n".join(character_list)
+            origin_data = await self.ncv.get_character_list(provider_name)
+            data = json.load(origin_data)
+            origin_character_list = []
+            for character, emotions in data.items():
+                emotion_list = "、".join(emotions)
+                # 将格式化的字符串添加到列表中
+                origin_character_list.append(f"{character}（{emotion_list}）")
+            character_list = "\n".join(origin_character_list)
+            return_text = (f"当前TTS平台：{provider_name}，角色列表：\n"
+                           "角色列表：\n"
+                           f"{character_list}\n"
+                           "切换角色使用对应角色的名称和情感，例如切换角色为胡桃，情感为default: !ncv 角色 Hutao default"
+                           )
         return return_text
 
     async def switch_provider(self, sender_id, provider_name: str):
