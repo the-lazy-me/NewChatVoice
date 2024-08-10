@@ -135,7 +135,7 @@ class SwitchVoicePlugin(CommandOperator):
                 "!ncv 角色列表  或  !ncv list\n"
                 "\n"
                 "5. 切换TTS平台：\n"
-                "!ncv 切换提供者 <TTS平台名称>  或  !ncv provider <TTS平台名称>\n"
+                "!ncv 平台 <TTS平台名称>  或  !ncv provider <TTS平台名称>\n"
                 "\n"
                 "6. 切换当前TTS平台的角色：\n"
                 "!ncv 角色 <角色信息>  或  !ncv character <角色信息>\n"
