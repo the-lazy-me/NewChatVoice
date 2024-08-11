@@ -121,7 +121,7 @@ TODO：
           except ImportError as e:
               self.ap.logger.error(f"Failed to import VoicePlugin: {e}")
               return False
-    
+      
           ncv = VoicePlugin(self.host)
           try:
               voice = await ncv.ncv_tts(launcher_id, text)
@@ -240,6 +240,8 @@ INFO:     Uvicorn running on http://0.0.0.0:5000 (Press CTRL+C to quit)
 >   - 特点：本地部署，自由度高，但是生成速度慢，使用成本高
 > - 我应该选什么
 >   - 为更好的体验，建议使用acgn_ttson，为了更高自由度，选择gpt_sovits
+> - ImportError：DLL load failed while importing _silkv3：找不到指定的模块
+>   - 在[这里](https://aka.ms/vs/17/release/vc_redist.x64.exe)下载最新版本的 **C++ Redistributable**
 
 ## 指令（重要）
 
