@@ -52,22 +52,6 @@ class NCV:
         provider = ProviderFactory.get_provider(provider_name, provider_config, self.temp_dir_path)
         return await provider.get_character_list()
 
-    # 加载角色列表，如果不存在则获取并保存
-    async def _load_character_list(self, provider_name):
-        character_list_path = os.path.join(self.temp_dir_path, f"character_list_{provider_name}.json")
-
-        if os.path.exists(character_list_path):
-            with open(character_list_path, "r", encoding="utf-8") as file:
-                return json.load(file)
-        else:
-            character_list = await self.get_character_list(provider_name)
-            if character_list is not None:
-                with open(character_list_path, "w", encoding="utf-8") as file:
-                    json.dump(character_list, file, ensure_ascii=False, indent=4)
-                return character_list
-            else:
-                return None
-
     # 加载用户数据模板
     def _load_user_data_template(self):
         try:
@@ -143,7 +127,7 @@ class NCV:
         if provider_name not in preferences:
             preferences[provider_name] = {}
 
-        character_list = await self._load_character_list(provider_name)
+        character_list = await self.get_character_list(provider_name)
 
         if provider_name == "acgn_ttson":
             character_id = config_updates.get("character_id")

@@ -44,31 +44,29 @@ class SwitchVoicePlugin(CommandOperator):
         provider_name = self.ncv.load_user_preference(sender_id)["provider"]
         if provider_name == "acgn_ttson":
             return_text = (
-                f"当前提供者为：{provider_name}，角色列表：\n"
+                f"当前TTS平台为：{provider_name}，角色列表：\n"
                 "当前角色较多，请查看云文档：\n"
                 "飞书云文档：https://s1c65jp249c.feishu.cn/sheets/WoiOsshwfhtUXRt2ZS0cVMCFnLc?from=from_copylink  \n"
                 "腾讯文档：https://docs.qq.com/sheet/DSFhQT3dUZkpabHVu?tab=BB08J2  \n"
                 "切换角色使用对应角色的id，例如切换角色为流萤(id为2075): !ncv 角色 2075"
             )
         elif provider_name == "gpt_sovits":
-            origin_data = await self.ncv.get_character_list(provider_name)
-            data = json.load(origin_data)
-            origin_character_list = []
-            for character, emotions in data.items():
-                emotion_list = "、".join(emotions)
-                # 将格式化的字符串添加到列表中
-                origin_character_list.append(f"{character}（{emotion_list}）")
-            character_list = "\n".join(origin_character_list)
-            return_text = (f"当前TTS平台：{provider_name}，角色列表：\n"
+            data = await self.ncv.get_character_list(provider_name)
+            character_list = ""
+            for name, emotions in data.items():
+                emotions_str = ",".join(emotions)
+                character_list += f"{name}：{emotions_str}\n"
+            return_text = (f"当前TTS平台：{provider_name}\n"
                            "角色列表：\n"
-                           f"{character_list}\n"
-                           "切换角色使用对应角色的名称和情感，例如切换角色为胡桃，情感为default: !ncv 角色 Hutao default"
+                           f"{character_list}"
+                           "切换角色使用对应角色的名称和情感，例如切换角色为胡桃，情感为default: \n"
+                           f"!ncv 角色 Hutao default"
                            )
         return return_text
 
     async def switch_provider(self, sender_id, provider_name: str):
         self.ncv.update_user_provider(sender_id, provider_name)
-        return f"为用户{sender_id}切换语音合成提供者为：{provider_name}"
+        return f"为用户{sender_id}切换TTS平台为：{provider_name}"
 
     async def switch_character(self, sender_id, character_info: str):
         provider_name = self.ncv.load_user_preference(sender_id)["provider"]
@@ -96,7 +94,7 @@ class SwitchVoicePlugin(CommandOperator):
             result = await self.list_characters(sender_id)
         elif command == "平台" or command == "provider":
             if len(context.crt_params) < 2:
-                result = "请指定TTS平台名称，acgn_ttson或gpt_sovits"
+                result = "请指定TTS平台名称：acgn_ttson或gpt_sovits"
             elif context.crt_params[1] not in ["acgn_ttson", "gpt_sovits"]:
                 result = f"无效的TTS平台名称：{context.crt_params[1]}，当前支持的TTS平台有：acgn_ttson, gpt_sovits"
             else:
