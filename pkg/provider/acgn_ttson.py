@@ -2,7 +2,7 @@ import aiohttp
 import json
 import os
 from graiax import silkcoder
-from plugins.NewChatVoice.pkg.provider.base_provider import TTSInterface
+from .base_provider import TTSInterface
 
 
 class ACGNTTSon(TTSInterface):

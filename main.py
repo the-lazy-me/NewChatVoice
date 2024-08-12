@@ -6,7 +6,7 @@ from pkg.plugin.context import register, handler, BasePlugin, APIHost, EventCont
 from pkg.plugin.events import *
 from pkg.command import entities
 from pkg.command.operator import CommandOperator, operator_class
-from plugins.NewChatVoice.pkg.ncv import NCV
+from .pkg.ncv import NCV
 
 # 定义命令常量
 CMD_ON = "开启"
@@ -153,7 +153,7 @@ class SwitchVoicePlugin(CommandOperator):
         yield entities.CommandReturn(text=result)
 
 
-@register(name="NewChatVoice", description="一个可以生成多种音色的语音对话插件", version="2.2", author="the-lazy-me")
+@register(name="NewChatVoice", description="一个可以生成多种音色的语音对话插件", version="2.1", author="the-lazy-me")
 class VoicePlugin(BasePlugin):
     def __init__(self, host: APIHost):
         super().__init__(host)

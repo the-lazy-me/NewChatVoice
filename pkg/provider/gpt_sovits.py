@@ -3,7 +3,7 @@ import json
 import os
 import time
 from graiax import silkcoder
-from plugins.NewChatVoice.pkg.provider.base_provider import TTSInterface
+from .base_provider import TTSInterface
 
 
 class GPTSovits(TTSInterface):
