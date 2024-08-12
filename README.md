@@ -99,7 +99,7 @@ INFO:     Uvicorn running on http://0.0.0.0:5000 (Press CTRL+C to quit)
 
 以下是参数解释
 
-- `provider`: 指定使用的TTS服务提供商，可以使用的是 `acgn_ttson`和`gpt_sovits`
+- `provider`: 默认使用的TTS服务提供商，可以使用的是 `acgn_ttson`和`gpt_sovits`
 - `max_characters`: 单个音频消息中最多包含的字符，超过即切分
 - `voiceWithText`: 设置回复语音消息时，是否连同文本一起回复
 - `temp_dir_path`: 临时文件存储路径。在合成过程中生成的语音文件将存储在这个目录中，每次运行主程序会清空
@@ -157,8 +157,10 @@ acgn_ttson角色列表：
 - 我应该选什么
   - 为更好的体验，建议使用acgn_ttson，为了更高自由度，选择gpt_sovits
 
-- ImportError：DLL load failed while importing _silkv3：找不到指定的模块
+- 报错：ImportError：DLL load failed while importing _silkv3：找不到指定的模块
   - 在[这里](https://aka.ms/vs/17/release/vc_redist.x64.exe)下载最新版本的 **C++ Redistributable**
+- 报错：{"detail":"未注册的用户，请联系管理员"}
+  - 没有填写acgn_ttson的token，如果不需要，则可以无视，这时建议把`config.json`的`provider`改为`gpt_sovits`，不然一直报这个
 
 
 ## 版本记录
