@@ -2,7 +2,7 @@
 
 > 但是我没学过python，代码大量依赖于AI生成，难免有不合理不正确之处，反正代码和人有一个能跑就行😋
 
-## NewChatVoice插件介绍
+## 插件介绍
 
 本插件调用了[海豚Ai TTS-Online文本转语音](https://www.ttson.cn/?source=thelazy)的接口，用于将QChatGPT返回的内容转换为多种角色语音
 
@@ -16,129 +16,9 @@ TODO：
 - [x] 支持返回更长语音，长文本自动切分，分开发送
 - [ ] 可能的WebUI配置页面，实现支持在线页面切换
 
-## 版本记录
-
-### NewChatVoice 2.1
-
-<details>
-  <summary>更新摘要：</summary>
-   2.1版本为新发，诸多项未经测试，代码未经优化，可能有诸多问题
-
-
-  - 群聊中自动切割长文本，以多个音频分别返回，私聊中单个音频直接返回（不得已而为之）
-
-  - 优化自动切分逻辑
-
-  - 修改外部调用接口
-
-      ```python
-      async def ncv_outside_interface(self, sender_id: str, text: str, split: bool) -> Voice:
-          """
-          供外部调用的文字转Voice的接口
-          Args:
-              sender_id (str): 会话ID
-              text (str): 要转换的文本
-              split (bool): 是否分割文本
-          Returns:
-              Voice: 生成的语音silk文件路径(如果split为True则以列表返回多个路径)
-          """
-          if split:
-              audio_paths = await self.ncv.auto_split_generate_audio(sender_id, text)
-              if audio_paths:
-                  return audio_paths
-          else:
-              audio_path = await self.ncv.no_split_generate_audio(sender_id, text)
-              return audio_path
-      ```
-      </details>
-
-### NewChatVoice 2.0
-
-<details>
-  <summary>更新摘要：</summary>
-   2.0版本为新发，诸多项未经测试，代码未经优化，可能有诸多问题
-
-  - 新增对gpt_sovits的支持
-
-  - 支持长文本自动切分，以多个音频消息发送
-
-  - 修改所有配置文件为json格式
-
-  - 修改外部调用接口
-
-      ```python
-      async def ncv_outsid_interface(self, sender_id: str, text: str) -> Voice:
-          """
-          供外部调用的文字转Voice的接口
-
-          Args:
-              sender_id (str): 会话ID
-              text (str): 要转换的文本
-
-          Returns:
-              Voice: 生成的语音silk文件列表
-          """
-      ```
 </details>
 
-### NewChatVoice 1.2
-<details>
-  <summary>更新摘要：</summary>
-  修改 配置文件位置，为了避免升级时被删除，过程文件及配置文件目录移至插件目录外：“QChatGPT\data\plugins\NewChatVoice\”。
-</details>
-
-### NewChatVoice 1.1
-<details>
-  <summary>更新摘要：</summary>
-
-
-  * 新增 外部调用接口。
-
-    * 外部调用将使用相同的插件配置文件，但无视voice_switch状态。
-
-    * 接口函数：
-
-      ```python
-      async def ncv_tts(self, user_id: str, text: str) -> Voice:
-          """
-          供外部调用的文字转Voice的接口
-
-          Args:
-              user_id (str): 会话ID
-              text (str): 要转换的文本
-
-          Returns:
-              Voice: 生成的语音对象
-          """
-      ```
-
-    * 调用示例：
-
-      ```python
-      async def handle_voice_synthesis(self, launcher_id: int, text: str, ctx: EventContext):
-          try:
-              from plugins.NewChatVoice.main import VoicePlugin, VoiceSynthesisError
-          except ImportError as e:
-              self.ap.logger.error(f"Failed to import VoicePlugin: {e}")
-              return False
-      
-          ncv = VoicePlugin(self.host)
-          try:
-              voice = await ncv.ncv_tts(launcher_id, text)
-              await ctx.event.query.adapter.reply_message(ctx.event.query.message_event, MessageChain([voice]), False)
-              return True
-          except VoiceSynthesisError as e:
-              self.ap.logger.error(f"{e}")
-              return False
-      ```
-
-  * 优化 配置文件逻辑。
-
-    * 配置将分为 通用配置 “conifg.yaml”，以及会话配置 “config_&#91;会话&#93;.yaml”
-    * 会话配置 优先级高于 通用配置
-</details>
-
-## NewChatVoice插件使用（重要）
+## 插件安装
 
 配置完成 [QChatGPT](https://github.com/RockChinQ/QChatGPT) 主程序后使用管理员账号向机器人发送命令即可安装：
 
@@ -147,7 +27,11 @@ TODO：
 ```
 或查看详细的[插件安装说明](https://github.com/RockChinQ/QChatGPT/wiki/5-%E6%8F%92%E4%BB%B6%E4%BD%BF%E7%94%A8)
 
-## token获取（重要）
+
+
+## 插件配置
+
+### acgn_ttson的token获取
 
 如果不使用在线语音则可跳过
 
@@ -159,7 +43,7 @@ TODO：
 
 **复制粘贴给出的网址**
 
-## GPT-SoVITS推理整合包
+### GPT-SoVITS推理整合包
 
 如果不使用本地语音则可跳过
 
@@ -182,7 +66,7 @@ INFO:     Uvicorn running on http://0.0.0.0:5000 (Press CTRL+C to quit)
 >
 > 其他平台，参考[原教程](https://www.yuque.com/xter/zibxlp/nqi871glgxfy717e#s54wm)
 
-## 配置（重要）
+### 配置文件
 
 打开NewChatVoice的config文件夹下的`config.json`，内容如下所示
 
@@ -231,19 +115,8 @@ INFO:     Uvicorn running on http://0.0.0.0:5000 (Press CTRL+C to quit)
   - `speed`: 语速，默认为1.0
   - `save_temp`: 是否保存临时文件，为true时，后端会保存生成的音频，下次相同请求会直接返回该数据，默认为true
 
-> **Q&A:**
->
-> - acgn_ttson是什么
->   - 答：这里的`acgn_ttson`是指这个站点[https://acgn.ttson.cn](https://acgn.ttson.cn)，一个在线生成二次元语音的，支持超多角色，生成速度快，生成效果好，使用成本低
-> - gpt_sovits是什么
->   - 这里的`gpt_sovits`是指GPT-SoVITS，这是[花儿不哭](https://space.bilibili.com/5760446/)大佬研发的低成本AI音色克隆软件。目前只有TTS（文字转语音）功能，将来会更新变声功能。（2024-08-08摘录自[GPT-SoVITS指南](https://www.yuque.com/baicaigongchang1145haoyuangong/ib3g1e)）
->   - 特点：本地部署，自由度高，但是生成速度慢，使用成本高
-> - 我应该选什么
->   - 为更好的体验，建议使用acgn_ttson，为了更高自由度，选择gpt_sovits
-> - ImportError：DLL load failed while importing _silkv3：找不到指定的模块
->   - 在[这里](https://aka.ms/vs/17/release/vc_redist.x64.exe)下载最新版本的 **C++ Redistributable**
 
-## 指令（重要）
+## 插件指令
 
 对话中，发送
 
@@ -268,5 +141,128 @@ INFO:     Uvicorn running on http://0.0.0.0:5000 (Press CTRL+C to quit)
 acgn_ttson角色列表：
 
 > 飞书云文档：https://s1c65jp249c.feishu.cn/sheets/WoiOsshwfhtUXRt2ZS0cVMCFnLc?from=from_copylink
+> 
 > 腾讯文档：https://docs.qq.com/sheet/DSFhQT3dUZkpabHVu?tab=BB08J2
+> 
 > 切换角色请使用id,例如切换角色为流萤(id为2075): !ncv 切换 2075
+
+## Q&A:
+- acgn_ttson是什么
+  - 答：这里的`acgn_ttson`是指这个站点[https://acgn.ttson.cn](https://acgn.ttson.cn)，一个在线生成二次元语音的，支持超多角色，生成速度快，生成效果好，使用成本低
+
+- gpt_sovits是什么
+  - 这里的`gpt_sovits`是指GPT-SoVITS，这是[花儿不哭](https://space.bilibili.com/5760446/)大佬研发的低成本AI音色克隆软件。目前只有TTS（文字转语音）功能，将来会更新变声功能。（2024-08-08摘录自[GPT-SoVITS指南](https://www.yuque.com/baicaigongchang1145haoyuangong/ib3g1e)）
+  - 特点：本地部署，自由度高，但是生成速度慢，使用成本高
+
+- 我应该选什么
+  - 为更好的体验，建议使用acgn_ttson，为了更高自由度，选择gpt_sovits
+
+- ImportError：DLL load failed while importing _silkv3：找不到指定的模块
+  - 在[这里](https://aka.ms/vs/17/release/vc_redist.x64.exe)下载最新版本的 **C++ Redistributable**
+
+
+## 版本记录
+
+<details> 
+  <summary>更新摘要：</summary> 
+
+### NewChatVoice 2.2
+
+优化可能有的诸多问题
+
+### NewChatVoice 2.1
+
+- 群聊中自动切割长文本，以多个音频分别返回，私聊中单个音频直接返回（不得已而为之）
+- 优化自动切分逻辑
+- 修改外部调用接口
+
+```python
+async def ncv_outside_interface(self, sender_id: str, text: str, split: bool) -> Voice:
+    """
+    供外部调用的文字转Voice的接口
+    Args:
+        sender_id (str): 会话ID
+        text (str): 要转换的文本
+        split (bool): 是否分割文本
+    Returns:
+        Voice: 生成的语音silk文件路径(如果split为True则以列表返回多个路径)
+    """
+    if split:
+        audio_paths = await self.ncv.auto_split_generate_audio(sender_id, text)
+        if audio_paths:
+            return audio_paths
+    else:
+        audio_path = await self.ncv.no_split_generate_audio(sender_id, text)
+        return audio_path
+```
+
+### NewChatVoice 2.0
+
+- 新增对gpt_sovits的支持
+- 支持长文本自动切分，以多个音频消息发送
+- 修改所有配置文件为json格式
+- 修改外部调用接口
+
+```python
+async def ncv_outsid_interface(self, sender_id: str, text: str) -> Voice:
+    """
+    供外部调用的文字转Voice的接口
+
+    Args:
+        sender_id (str): 会话ID
+        text (str): 要转换的文本
+
+    Returns:
+        Voice: 生成的语音silk文件列表
+    """
+```
+
+### NewChatVoice 1.2
+
+- 修改配置文件位置，为了避免升级时被删除，过程文件及配置文件目录移至插件目录外：“QChatGPT\data\plugins\NewChatVoice\”。
+
+### NewChatVoice 1.1
+
+- 新增外部调用接口。
+
+    - 外部调用将使用相同的插件配置文件，但无视voice_switch状态。
+    - 接口函数：
+
+      ```python
+      async def ncv_tts(self, user_id: str, text: str) -> Voice:
+          """
+          供外部调用的文字转Voice的接口
+
+          Args:
+              user_id (str): 会话ID
+              text (str): 要转换的文本
+
+          Returns:
+              Voice: 生成的语音对象
+          """
+      ```
+
+    - 调用示例：
+
+      ```python
+      async def handle_voice_synthesis(self, launcher_id: int, text: str, ctx: EventContext):
+          try:
+              from plugins.NewChatVoice.main import VoicePlugin, VoiceSynthesisError
+          except ImportError as e:
+              self.ap.logger.error(f"Failed to import VoicePlugin: {e}")
+              return False
+      
+          ncv = VoicePlugin(self.host)
+          try:
+              voice = await ncv.ncv_tts(launcher_id, text)
+              await ctx.event.query.adapter.reply_message(ctx.event.query.message_event, MessageChain([voice]), False)
+              return True
+          except VoiceSynthesisError as e:
+              self.ap.logger.error(f"{e}")
+              return False
+      ```
+
+- 优化配置文件逻辑。
+
+    - 配置将分为通用配置“config.yaml”，以及会话配置“config_[会话].yaml”
+    - 会话配置优先级高于通用配置

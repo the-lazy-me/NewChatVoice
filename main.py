@@ -8,23 +8,31 @@ from pkg.command import entities
 from pkg.command.operator import CommandOperator, operator_class
 from plugins.NewChatVoice.pkg.ncv import NCV
 
+# 定义命令常量
+CMD_ON = "开启"
+CMD_OFF = "关闭"
+CMD_STATUS = "状态"
+CMD_LIST = "角色列表"
+CMD_PROVIDER = "平台"
+CMD_CHARACTER = "角色"
+CMD_HELP = "帮助"
+SUPPORTED_PROVIDERS = ["acgn_ttson", "gpt_sovits"]
 
-#
+
 @operator_class(name="ncv", help="获取帮助请输入：！ncv 帮助", privilege=1)
 class SwitchVoicePlugin(CommandOperator):
-
     def __init__(self, host: APIHost):
         super().__init__(host)
         self.ncv = NCV()
 
     async def enable_voice(self, sender_id):
         provider_name = self.ncv.load_user_preference(sender_id)["provider"]
-        await self.ncv.updata_voice_switch(sender_id, True)
+        await self.ncv.update_voice_switch(sender_id, True)
         return f"为用户{sender_id}开启语音合成，当前TTS平台为：{provider_name}"
 
     async def disable_voice(self, sender_id):
         provider_name = self.ncv.load_user_preference(sender_id)["provider"]
-        await self.ncv.updata_voice_switch(sender_id, False)
+        await self.ncv.update_voice_switch(sender_id, False)
         return f"为用户{sender_id}关闭语音合成，当前TTS平台为：{provider_name}"
 
     async def check_status(self, sender_id):
@@ -48,7 +56,7 @@ class SwitchVoicePlugin(CommandOperator):
                 "当前角色较多，请查看云文档：\n"
                 "飞书云文档：https://s1c65jp249c.feishu.cn/sheets/WoiOsshwfhtUXRt2ZS0cVMCFnLc?from=from_copylink  \n"
                 "腾讯文档：https://docs.qq.com/sheet/DSFhQT3dUZkpabHVu?tab=BB08J2  \n"
-                "切换角色使用对应角色的id，例如切换角色为流萤(id为2075): !ncv 角色 2075"
+                "切换角色使用对应角色的id，例如切换角色为流萤(id为2075): \n !ncv 角色 2075"
             )
         elif provider_name == "gpt_sovits":
             data = await self.ncv.get_character_list(provider_name)
@@ -58,7 +66,7 @@ class SwitchVoicePlugin(CommandOperator):
                 character_list += f"{name}：{emotions_str}\n"
             return_text = (f"当前TTS平台：{provider_name}\n"
                            "角色列表：\n"
-                           f"{character_list}"
+                           f"{character_list}\n"
                            "切换角色使用对应角色的名称和情感，例如切换角色为胡桃，情感为default: \n"
                            f"!ncv 角色 Hutao default"
                            )
@@ -72,34 +80,34 @@ class SwitchVoicePlugin(CommandOperator):
         provider_name = self.ncv.load_user_preference(sender_id)["provider"]
         if provider_name == "acgn_ttson":
             character_id = character_info["character_id"]
-            resonse = await self.ncv.update_character_config(sender_id, provider_name, {"character_id": character_id})
+            response = await self.ncv.update_character_config(sender_id, provider_name, {"character_id": character_id})
 
         elif provider_name == "gpt_sovits":
             character_name = character_info["character_name"]
             emotion = character_info["emotion"]
-            resonse = await self.ncv.update_character_config(sender_id, provider_name,
-                                                             {"character_name": character_name, "emotion": emotion})
-        return resonse
+            response = await self.ncv.update_character_config(sender_id, provider_name,
+                                                              {"character_name": character_name, "emotion": emotion})
+        return response
 
     async def execute(self, context: entities.ExecuteContext) -> typing.AsyncGenerator[entities.CommandReturn, None]:
         sender_id = int(context.query.sender_id)
         command = context.crt_params[0]
-        if command == "开启" or command == "on":
+        if command in [CMD_ON, "on"]:
             result = await self.enable_voice(sender_id)
-        elif command == "关闭" or command == "off":
+        elif command in [CMD_OFF, "off"]:
             result = await self.disable_voice(sender_id)
-        elif command == "状态" or command == "status":
+        elif command in [CMD_STATUS, "status"]:
             result = await self.check_status(sender_id)
-        elif command == "角色列表" or command == "list":
+        elif command in [CMD_LIST, "list"]:
             result = await self.list_characters(sender_id)
-        elif command == "平台" or command == "provider":
+        elif command in [CMD_PROVIDER, "provider"]:
             if len(context.crt_params) < 2:
                 result = "请指定TTS平台名称：acgn_ttson或gpt_sovits"
-            elif context.crt_params[1] not in ["acgn_ttson", "gpt_sovits"]:
+            elif context.crt_params[1] not in SUPPORTED_PROVIDERS:
                 result = f"无效的TTS平台名称：{context.crt_params[1]}，当前支持的TTS平台有：acgn_ttson, gpt_sovits"
             else:
                 result = await self.switch_provider(sender_id, context.crt_params[1])
-        elif command == "角色" or command == "character":
+        elif command in [CMD_CHARACTER, "character"]:
             if len(context.crt_params) < 2:
                 result = ("请指定角色信息，例如：\n"
                           "acgn_ttson使用!ncv 角色 2075 "
@@ -116,7 +124,7 @@ class SwitchVoicePlugin(CommandOperator):
                     result = await self.switch_character(sender_id,
                                                          {"character_name": character_name, "emotion": emotion})
 
-        elif command == "帮助" or command == "help":
+        elif command in [CMD_HELP, "help"]:
             result = (
                 "NewChatVoice语音合成插件,一个可以生成多种音色的语音对话插件 \n"
                 "支持的指令有：\n"
@@ -145,78 +153,46 @@ class SwitchVoicePlugin(CommandOperator):
         yield entities.CommandReturn(text=result)
 
 
-@register(name="NewChatVoice", description="一个可以生成多种音色的语音对话插件", version="2.1", author="the-lazy-me")
+@register(name="NewChatVoice", description="一个可以生成多种音色的语音对话插件", version="2.2", author="the-lazy-me")
 class VoicePlugin(BasePlugin):
     def __init__(self, host: APIHost):
         super().__init__(host)
         self.ncv = NCV()
         self.voiceWithText = False
-        # 加载全局配置文件
-        global_config = _load_global_config()
-        self.voiceWithText = global_config['voiceWithText']
-        # 清空音频临时文件
-        temp_dir_path = global_config['temp_dir_path']
-        _clear_temp_dir(temp_dir_path)
+        global_config = self._load_global_config()
+        self.voiceWithText = global_config.get('voiceWithText', False)
+        temp_dir_path = global_config.get('temp_dir_path', 'temp/')
+        self._clear_temp_dir(temp_dir_path)
 
-    async def ncv_outside_interface(self, sender_id: str, text: str, split: bool) -> Voice:
-        """
-        供外部调用的文字转Voice的接口
+    def _load_global_config(self):
+        try:
+            with open("data/plugins/NewChatVoice/config/global_config.json", "r", encoding="utf-8") as file:
+                return json.load(file)
+        except Exception as e:
+            print(f"加载全局配置文件时出错: {e}")
+            return {}
 
-        Args:
-            sender_id (str): 会话ID
-            text (str): 要转换的文本
-            split (bool): 是否分割文本
-
-        Returns:
-            Voice: 生成的语音silk文件列表
-        """
-        if split:
-            audio_paths = await self.ncv.auto_split_generate_audio(sender_id, text)
-            if audio_paths:
-                return audio_paths
-        else:
-            audio_path = await self.ncv.no_split_generate_audio(sender_id, text)
-            return audio_path
-        return None
+    def _clear_temp_dir(self, temp_dir_path: str):
+        try:
+            if not os.path.exists(temp_dir_path):
+                os.makedirs(temp_dir_path)
+            else:
+                for file in os.listdir(temp_dir_path):
+                    os.remove(os.path.join(temp_dir_path, file))
+        except Exception as e:
+            print(f"清理临时目录时出错: {e}")
 
     @handler(NormalMessageResponded)
     async def text_to_voice(self, ctx: EventContext):
         user_prefer = self.ncv.load_user_preference(ctx.event.sender_id)
-
         if not user_prefer["voice_switch"]:
             return
 
         ctx.prevent_default()
-        launcher_type = str(ctx.event.query.launcher_type)
-        target_type = launcher_type.split('.')[-1].lower()
+        target_type = str(ctx.event.query.launcher_type).split('.')[-1].lower()
         sender_id = ctx.event.sender_id
         group_id = ctx.event.launcher_id
         text = ctx.event.response_text
-        # audio_paths = await self.ncv.auto_split_generate_audio(sender_id, text)
-        # if audio_paths:
-        #     # 打印音频路径数量
-        #     # print(f"Number of audio paths: {len(audio_paths)}")
-        #     # 根据目标类型决定接收者
-        #     if target_type == "group":
-        #         receiver_id = group_id
-        #     elif target_type == "person":
-        #         receiver_id = sender_id
-        #     else:
-        #         # print(f"Unsupported target type: {target_type}")
-        #         return
-        #
-        #     # 遍历生成的音频文件路径
-        #     for audio_path in audio_paths:
-        #         # print(f"audio_path: {audio_path}")
-        #         # 发送语音消息
-        #         await ctx.send_message(target_type, receiver_id, [Voice(path=str(audio_path))])
-        #         # print(f"Send voice message to {receiver_id}")
-        #
-        #     if self.voiceWithText:
-        #         # 发送文字消息
-        #         await ctx.send_message(target_type, receiver_id, [Plain(text)])
-
-        # 下面做法的原因是，如果一次性发送多个音频文件，在群聊中是正常的，但是在私聊中会出现问题，唉，真可惜
 
         if target_type == "person":
             receiver_id = sender_id
@@ -231,24 +207,5 @@ class VoicePlugin(BasePlugin):
             if self.voiceWithText:
                 await ctx.send_message(target_type, receiver_id, [Plain(text)])
 
-    # 插件卸载时触发
     def __del__(self):
         pass
-
-
-def _load_global_config():
-    global_config = {}
-    try:
-        with open("data/plugins/NewChatVoice/config/global_config.json", "r", encoding="utf-8") as file:
-            global_config = json.load(file)
-    except Exception as e:
-        print(f"Error loading global config: {e}")
-    return global_config
-
-
-def _clear_temp_dir(temp_dir_path: str):
-    if not os.path.exists(temp_dir_path):
-        os.makedirs(temp_dir_path)
-    else:
-        for file in os.listdir(temp_dir_path):
-            os.remove(os.path.join(temp_dir_path, file))

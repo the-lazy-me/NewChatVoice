@@ -174,31 +174,3 @@ class ACGNTTSon(TTSInterface):
 
         # 返回保存成功的信息
         return f"用户 {user_id} 的偏好已保存为：角色 {character_name}（ID：{character_id}）"
-
-# import asyncio
-#
-#
-# # 示例主函数
-# async def main():
-#     # 创建 TTS 实例
-#     tts = ACGNTTSon(temp_dir_path="./temp")
-#
-#     # 设置 token
-#     tts.set_token("048F398615EB4158C098D11DFA30950D")
-#
-#     # 获取角色列表并保存到文件
-#     characters = await tts.get_character_list(file_path="./temp")
-#     # print("角色列表:", characters)
-#
-#     # 生成音频
-#     silk_path = await tts.generate_audio("你好，世界！", 430)
-#     print("生成的音频路径:", silk_path)
-#
-#     # 保存用户偏好
-#     res = tts.update_user_preference("user123", 2075)
-#
-#     print(res)
-#
-#
-# # 运行异步主函数
-# asyncio.run(main())
