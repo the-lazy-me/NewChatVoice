@@ -4,11 +4,14 @@ from typing import Any, Dict, List, Union
 from .manager.config_manager import ConfigManager
 from .manager.user_data_manager import UserDataManager
 from .utils.split_long_sentence import split_long_sentence
+from .utils.synchronize_templates import synchronize_templates
 from .provider.provider_factory import ProviderFactory
 
 
 class NCV:
     def __init__(self):
+        # 同步模板文件
+        synchronize_templates("plugins/NewChatVoice/templates", "data/plugins/NewChatVoice")
         # 实例化配置管理器
         self.config_manager = ConfigManager("data/plugins/NewChatVoice/config")
         # 实例化用户数据管理器
