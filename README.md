@@ -1,4 +1,4 @@
-# NewChatVoice插件使用教程
+![image](https://github.com/user-attachments/assets/f06b5f62-263b-45f0-83ef-e3f06ef53aae)# NewChatVoice插件使用教程
 
 > 但是我没学过python，代码大量依赖于AI生成，难免有不合理不正确之处，反正代码和人有一个能跑就行😋
 
@@ -68,7 +68,7 @@ INFO:     Uvicorn running on http://0.0.0.0:5000 (Press CTRL+C to quit)
 
 ### 配置文件
 
-打开NewChatVoice的config文件夹下的`config.json`，内容如下所示
+打开NewChatVoice的config文件夹下的`global_config.json`，内容如下所示
 
 ```json
 {
