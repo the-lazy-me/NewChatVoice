@@ -160,7 +160,7 @@ acgn_ttson角色列表：
 - 报错：ImportError：DLL load failed while importing _silkv3：找不到指定的模块
   - 在[这里](https://aka.ms/vs/17/release/vc_redist.x64.exe)下载最新版本的 **C++ Redistributable**
 - 报错：{"detail":"未注册的用户，请联系管理员"}
-  - 没有填写acgn_ttson的token，如果不需要，则可以无视，这时建议把`config.json`的`provider`改为`gpt_sovits`，不然一直报这个
+  - 没有填写acgn_ttson的token，如果不需要，则可以无视，这时建议把`global_config.json`的`provider`改为`gpt_sovits`，不然一直报这个
 
 
 ## 版本记录
