@@ -96,8 +96,9 @@ class NCV:
             character_name = config_updates.get("character_name")
             emotion = config_updates.get("emotion")
             if character_name is not None and emotion is not None:
-                if any(char["character_name"] == character_name and char["emotion"] == emotion for char in
-                       character_list):
+                # character_list示例：{'Hutao': ['default'], '申鹤': ['default']}
+                if character_name in character_list and emotion in character_list[character_name]:
+                    
                     preferences[provider_name]["character_name"] = character_name
                     preferences[provider_name]["emotion"] = emotion
                     self.user_data_manager._save_user_preference(user_id, preferences)
