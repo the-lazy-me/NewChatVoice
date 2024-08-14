@@ -6,13 +6,14 @@
 
 NewChatVoice，一个可以调用多个TTS服务平台的[QChatGPT](https://github.com/RockChinQ/QChatGPT)插件，用于将LLM返回的文本转为你喜欢的语音
 
-特点：
-1. 支持[TTS-Online原神免费文本转语音](https://acgn.ttson.cn/)，在使用中，本插件称之为`acgn_ttson`
-2. [GPT-SoVITS](https://github.com/RVC-Boss/GPT-SoVITS)，在使用中，本插件称之为`gpt_sovits`
+当前支持以下TTS服务平台：
+1. [TTS-Online原神免费文本转语音](https://acgn.ttson.cn/)（在使用中，本插件称之为`acgn_ttson`）
+2. [GPT-SoVITS](https://github.com/RVC-Boss/GPT-SoVITS)（在使用中本插件称之为`gpt_sovits`）
 
 TODO：
 
 - [x] 支持[GPT-SoVITS](https://github.com/RVC-Boss/GPT-SoVITS)
+- [ ] 支持[海豚AI 海豚配音 TTS Online](https://www.ttson.cn/?source=thelazy)
 - [ ] 支持[fish-speech](https://github.com/fishaudio/fish-speech)
 - [ ] 支持[ChatTTS](https://github.com/2noise/ChatTTS)
 - [x] 支持返回更长语音，长文本自动切分，分开发送
@@ -27,7 +28,6 @@ TODO：
 ```
 !plugin get https://github.com/the-lazy-me/NewChatVoice.git
 ```
-或查看详细的[插件安装说明](https://github.com/RockChinQ/QChatGPT/wiki/5-%E6%8F%92%E4%BB%B6%E4%BD%BF%E7%94%A8)
 
 
 
