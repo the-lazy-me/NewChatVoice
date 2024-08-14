@@ -68,7 +68,7 @@ INFO:     Uvicorn running on http://0.0.0.0:5000 (Press CTRL+C to quit)
 
 ### 配置文件
 
-打开NewChatVoice的config文件夹下的`global_config.json`，内容如下所示
+打开`data/plugins/NewChatVoice`的config文件夹下的`global_config.json`，内容如下所示
 
 ```json
 {
