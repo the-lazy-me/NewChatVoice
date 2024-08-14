@@ -140,7 +140,7 @@ INFO:     Uvicorn running on http://0.0.0.0:5000 (Press CTRL+C to quit)
 `!ncv 平台 <TTS平台名称>`  或  `!ncv provider <TTS平台名称>`
 
 6. 切换当前TTS平台的角色：
-`!ncv 切换角色 <角色>`  或  `!ncv character <角色>`
+`!ncv 角色 <角色>`  或  `!ncv character <角色>`
 
 7. 查看NewChatVoice插件的帮助：
 `!ncv 帮助`  或  `!ncv help`
