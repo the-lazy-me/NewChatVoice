@@ -70,6 +70,8 @@ INFO:     Uvicorn running on http://0.0.0.0:5000 (Press CTRL+C to quit)
 
 ### 配置文件
 
+> 请注意，所有的配置文件和用户数据，默认都在QChatGPT目录下的`data/plugins/NewChatVoice`中
+
 打开`data/plugins/NewChatVoice`的config文件夹下的`global_config.json`，内容如下所示
 
 ```json
