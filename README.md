@@ -1,12 +1,14 @@
 # NewChatVoice插件使用教程
 
-> 但是我没学过python，代码大量依赖于AI生成，难免有不合理不正确之处，反正代码和人有一个能跑就行😋
+> 我没学过python，代码大量依赖于AI生成，难免有不合理不正确之处，反正代码和人有一个能跑就行😋
 
 ## 插件介绍
 
-本插件调用了[海豚Ai TTS-Online文本转语音](https://www.ttson.cn/?source=thelazy)的接口，用于将QChatGPT返回的内容转换为多种角色语音
+NewChatVoice，一个可以调用多个TTS服务平台的[QChatGPT](https://github.com/RockChinQ/QChatGPT)插件，用于将LLM返回的文本转为你喜欢的语音
 
-特点：速度快，低价，效果好，支持原神、星铁、日漫1000+个角色、鸣潮、红警、APEX等多种类型的角色音色
+特点：
+1. 支持[TTS-Online原神免费文本转语音](https://acgn.ttson.cn/)，在使用中，本插件称之为`acgn_ttson`
+2. [GPT-SoVITS](https://github.com/RVC-Boss/GPT-SoVITS)，在使用中，本插件称之为`gpt_sovits`
 
 TODO：
 
@@ -51,7 +53,7 @@ TODO：
 
 推理整合包下载路径：[参考原教程的整合包下载部分](https://www.yuque.com/xter/zibxlp/nqi871glgxfy717e#K8NQm)
 
-下载，解压，依次打开`0 一键启动脚本`然后`5 启动后端程序.bat`
+下载，解压，打开`0 一键启动脚本`文件夹，然后双击打开里面的`5 启动后端程序.bat`
 
 等待1分钟之内，可以看到如下提示就说明可以了
 
