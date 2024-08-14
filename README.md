@@ -125,22 +125,25 @@ INFO:     Uvicorn running on http://0.0.0.0:5000 (Press CTRL+C to quit)
 对话中，发送
 
 1. 为当前用户开启语音：
-!ncv 开启  或  !ncv on
+`!ncv` 开启  或  `!ncv on`
 
 2. 为当前用户关闭语音：
-!ncv 关闭  或  !ncv off
+`!ncv 关闭`  或  `!ncv off`
 
 3. 查看当前用户语音合成状态：
-!ncv 状态  或  !ncv status
+`!ncv 状态`  或  `!ncv status`
 
 4. 查看当前TTS平台的角色列表：
-   !ncv 角色列表  或  !ncv list
+`!ncv 角色列表`  或  `!ncv list`
 
 5. 切换TTS平台：
-!ncv 切换提供者 <TTS平台名称>  或  !ncv provider <TTS平台名称>
+`!ncv 平台 <TTS平台名称>`  或  `!ncv provider <TTS平台名称>`
 
 6. 切换当前TTS平台的角色：
-!ncv 切换角色 <角色>  或  !ncv character <角色>
+`!ncv 切换角色 <角色>`  或  `!ncv character <角色>`
+
+7. 查看NewChatVoice插件的帮助：
+`!ncv 帮助`  或  `!ncv help`
 
 acgn_ttson角色列表：
 
