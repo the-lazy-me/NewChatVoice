@@ -146,7 +146,10 @@ class SwitchVoicePlugin(CommandOperator):
                 "6. 切换当前TTS平台的角色：\n"
                 "!ncv 角色 <角色信息>  或  !ncv character <角色信息>\n"
                 "\n"
-                "7. 查看详细帮助：https://github.com/the-lazy-me/NewChatVoice\n"
+                "7. 查看NewChatVoice插件的帮助：\n"
+                "!ncv 帮助  或  !ncv help\n"
+                "\n"
+                "8. 详细教程：https://github.com/the-lazy-me/NewChatVoice/tree/master"
             )
         else:
             result = '无效指令，请输入"!ncv 帮助"查看帮助'
