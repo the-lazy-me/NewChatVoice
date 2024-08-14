@@ -1,5 +1,6 @@
 import json
 import os
+import base64
 
 from mirai import *
 from pkg.plugin.context import register, handler, BasePlugin, APIHost, EventContext
@@ -200,13 +201,23 @@ class VoicePlugin(BasePlugin):
         if target_type == "person":
             receiver_id = sender_id
             single_audio_path = await self.ncv.no_split_generate_audio(sender_id, text)
-            await ctx.send_message(target_type, receiver_id, [Voice(path=str(single_audio_path))])
+            if single_audio_path:
+                # print(single_audio_path)
+                # base64编码
+                with open(single_audio_path, "rb") as f:
+                    base64_audio = base64.b64encode(f.read()).decode()
+                await ctx.send_message(target_type, receiver_id, [Voice(base64=base64_audio)])
+            # await ctx.send_message(target_type, receiver_id, [Voice(path=str(single_audio_path))])
         elif target_type == "group":
             receiver_id = group_id
             audio_paths = await self.ncv.auto_split_generate_audio(sender_id, text)
             if audio_paths:
                 for audio_path in audio_paths:
-                    await ctx.send_message(target_type, receiver_id, [Voice(path=str(audio_path))])
+                    # base64编码
+                    with open(audio_path, "rb") as f:
+                        base64_audio = base64.b64encode(f.read()).decode()
+                    await ctx.send_message(target_type, receiver_id, [Voice(base64=base64_audio)])
+                    # await ctx.send_message(target_type, receiver_id, [Voice(path=str(audio_path))])
             if self.voiceWithText:
                 await ctx.send_message(target_type, receiver_id, [Plain(text)])
 
