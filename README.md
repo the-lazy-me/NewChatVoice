@@ -168,6 +168,8 @@ acgn_ttson角色列表：
   - 在[这里](https://aka.ms/vs/17/release/vc_redist.x64.exe)下载最新版本的 **C++ Redistributable**
 - 报错：{"detail":"未注册的用户，请联系管理员"}
   - 没有填写acgn_ttson的token，如果不需要，则可以无视，这时建议把`global_config.json`的`provider`改为`gpt_sovits`，不然一直报这个
+- 报错：插件 NewChatVoice 触发事件 NormalMessageResponded 时发生错误: Cannot connect to host 127.0.0.1:5000 ssl:default [远程计算机拒绝网络连接。]
+  - gpt_sovits没有开启，按教程开启上面整合包中的后端程序
 
 
 ## 版本记录
