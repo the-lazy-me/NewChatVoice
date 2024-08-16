@@ -156,19 +156,49 @@ acgn_ttson角色列表：
 ## Q&A:
 - acgn_ttson是什么
   - 答：这里的`acgn_ttson`是指这个站点[https://acgn.ttson.cn](https://acgn.ttson.cn)，一个在线生成二次元语音的，支持超多角色，生成速度快，生成效果好，使用成本低
+  
 - gpt_sovits是什么
   - 这里的`gpt_sovits`是指GPT-SoVITS，这是[花儿不哭](https://space.bilibili.com/5760446/)大佬研发的低成本AI音色克隆软件。目前只有TTS（文字转语音）功能，将来会更新变声功能。（2024-08-08摘录自[GPT-SoVITS指南](https://www.yuque.com/baicaigongchang1145haoyuangong/ib3g1e)）
   - 特点：本地部署，自由度高，但是生成速度慢，使用成本高
+  
 - 我应该选什么
   - 为更好的体验，建议使用acgn_ttson，为了更高自由度，选择gpt_sovits
+  
 - 如何给gpt_sovits增加新的模型
   - 请自行详细阅读[UP主 箱庭计划 的GPT-soVITS-Inference教程](https://www.yuque.com/xter/zibxlp)
+  
 - 报错：ImportError：DLL load failed while importing _silkv3：找不到指定的模块
   - 在[这里](https://aka.ms/vs/17/release/vc_redist.x64.exe)下载最新版本的 **C++ Redistributable**
+  
 - 报错：{"detail":"未注册的用户，请联系管理员"}
   - 没有填写acgn_ttson的token，如果不需要，则可以无视，这时建议把`global_config.json`的`provider`改为`gpt_sovits`，不然一直报这个
+  
 - 报错：插件 NewChatVoice 触发事件 NormalMessageResponded 时发生错误: Cannot connect to host 127.0.0.1:5000 ssl:default [远程计算机拒绝网络连接。]
   - gpt_sovits没有开启，按教程开启上面整合包中的后端程序
+  
+- 如何给GPT-SoVITS增加模型
+
+  - 自己制作或在网上下载，例如：B站UP主[白菜工厂1145号员工](https://space.bilibili.com/518098961)分享了很多
+  - 有了模型后，导入到GPT-SoVITS整合包的trained文件夹中，而且要符合[要求](https://www.yuque.com/xter/zibxlp/sz10r2g30y6yexkh)
+  - 此外实测，模型文件夹内，必须要有`infer_config.json`文件，内容必须符合如下格式，特别是要有emotion_list
+
+  ```json
+  {
+      "gpt_path": "hutao-e75.ckpt",
+      "sovits_path": "hutao_e60_s3360.pth",
+      "software_version": "1.1",
+      "简介": "这是一个配置文件适用于https://github.com/X-T-E-R/TTS-for-GPT-soVITS，是一个简单好用的前后端项目",
+      "emotion_list": {
+          "default": {
+              "ref_wav_path": "我说白术，你不会看不出来吧？难不成你师父，忘了教你这门功夫？.wav",
+              "prompt_text": "我说白术，你不会看不出来吧？难不成你师父，忘了教你这门功夫？",
+              "prompt_language": "多语种混合"
+          }
+      }
+  }
+  ```
+
+  
 
 
 ## 版本记录
