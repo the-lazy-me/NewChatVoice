@@ -125,7 +125,7 @@ INFO:     Uvicorn running on http://0.0.0.0:5000 (Press CTRL+C to quit)
 对话中，发送
 
 1. 为当前用户开启语音：
-`!ncv` 开启  或  `!ncv on`
+`!ncv 开启`  或  `!ncv on`
 
 2. 为当前用户关闭语音：
 `!ncv 关闭`  或  `!ncv off`
