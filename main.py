@@ -197,6 +197,8 @@ class VoicePlugin(BasePlugin):
         sender_id = ctx.event.sender_id
         group_id = ctx.event.launcher_id
         text = ctx.event.response_text
+        text=text.replace(" ","")
+        text=text.replace("*","")        
 
         if target_type == "person":
             receiver_id = sender_id
